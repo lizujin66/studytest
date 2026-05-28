@@ -1,0 +1,11 @@
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /Users/lzj/code/opencv-studytest/opencv/.cxx/Debug/6r1j3j1e/x86/CMakeFiles/CMakeTmp
+
+Run Build Command:"/Users/lzj/Library/Android/sdk/cmake/3.10.2.4988404/bin/ninja" "cmTC_28360"
+[1/2] Building CXX object CMakeFiles/cmTC_28360.dir/testCXXCompiler.cxx.o
+FAILED: CMakeFiles/cmTC_28360.dir/testCXXCompiler.cxx.o 
+/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=i686-none-linux-android28 --gcc-toolchain=/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/sysroot    -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -fno-typed-cxx-new-delete  -fPIE -o CMakeFiles/cmTC_28360.dir/testCXXCompiler.cxx.o -c testCXXCompiler.cxx
+clang++: error: unknown argument: '-fno-typed-cxx-new-delete'
+ninja: build stopped: subcommand failed.
+
+

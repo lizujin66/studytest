@@ -1,0 +1,2 @@
+ninja: Entering directory `/Users/lzj/code/opencv-studytest/opencv/.cxx/Debug/6w52k4m2/x86_64'
+ninja: no work to do.

@@ -1,0 +1,27 @@
+Detecting CXX compiler ABI info failed to compile with the following output:
+Change Dir: /Users/lzj/code/opencv-studytest/opencv/.cxx/Debug/3n1k4mp5/armeabi-v7a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/Users/lzj/Library/Android/sdk/cmake/3.18.1/bin/ninja cmTC_46ac2 && [1/2] Building CXX object CMakeFiles/cmTC_46ac2.dir/CMakeCXXCompilerABI.cpp.o
+FAILED: CMakeFiles/cmTC_46ac2.dir/CMakeCXXCompilerABI.cpp.o 
+/Users/lzj/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=armv7-none-linux-androideabi28 --sysroot=/Users/lzj/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat  -fno-typed-cxx-new-delete  -fPIE   -v -MD -MT CMakeFiles/cmTC_46ac2.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_46ac2.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_46ac2.dir/CMakeCXXCompilerABI.cpp.o -c /Users/lzj/Library/Android/sdk/cmake/3.18.1/share/cmake-3.18/Modules/CMakeCXXCompilerABI.cpp
+clang++: error: unknown argument: '-fno-typed-cxx-new-delete'
+Android (8490178, based on r450784d) clang version 14.0.6 (https://android.googlesource.com/toolchain/llvm-project 4c603efb0cca074e9238af8b4106c30add4418f6)
+Target: armv7-none-linux-android28
+Thread model: posix
+InstalledDir: /Users/lzj/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/bin
+ninja: build stopped: subcommand failed.
+
+
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /Users/lzj/code/opencv-studytest/opencv/.cxx/Debug/3n1k4mp5/armeabi-v7a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/Users/lzj/Library/Android/sdk/cmake/3.18.1/bin/ninja cmTC_416d1 && [1/2] Building CXX object CMakeFiles/cmTC_416d1.dir/testCXXCompiler.cxx.o
+FAILED: CMakeFiles/cmTC_416d1.dir/testCXXCompiler.cxx.o 
+/Users/lzj/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=armv7-none-linux-androideabi28 --sysroot=/Users/lzj/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security  -fno-typed-cxx-new-delete  -fPIE -MD -MT CMakeFiles/cmTC_416d1.dir/testCXXCompiler.cxx.o -MF CMakeFiles/cmTC_416d1.dir/testCXXCompiler.cxx.o.d -o CMakeFiles/cmTC_416d1.dir/testCXXCompiler.cxx.o -c testCXXCompiler.cxx
+clang++: error: unknown argument: '-fno-typed-cxx-new-delete'
+ninja: build stopped: subcommand failed.
+
+
+

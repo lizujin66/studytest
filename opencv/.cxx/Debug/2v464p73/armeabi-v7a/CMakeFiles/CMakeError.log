@@ -1,0 +1,34 @@
+Detecting CXX compiler ABI info failed to compile with the following output:
+Change Dir: /Users/lzj/code/opencv-studytest/opencv/.cxx/Debug/2v464p73/armeabi-v7a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/Users/lzj/Library/Android/sdk/cmake/3.18.1/bin/ninja cmTC_6aa7f && [1/2] Building CXX object CMakeFiles/cmTC_6aa7f.dir/CMakeCXXCompilerABI.cpp.o
+FAILED: CMakeFiles/cmTC_6aa7f.dir/CMakeCXXCompilerABI.cpp.o 
+/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=armv7-none-linux-androideabi28 --gcc-toolchain=/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat  -fno-typed-cxx-new-delete  -fPIE   -v -MD -MT CMakeFiles/cmTC_6aa7f.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_6aa7f.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_6aa7f.dir/CMakeCXXCompilerABI.cpp.o -c /Users/lzj/Library/Android/sdk/cmake/3.18.1/share/cmake-3.18/Modules/CMakeCXXCompilerABI.cpp
+clang++: error: unknown argument: '-fno-typed-cxx-new-delete'
+Android (7019983 based on r365631c3) clang version 9.0.9 (https://android.googlesource.com/toolchain/llvm-project a2a1e703c0edb03ba29944e529ccbf457742737b) (based on LLVM 9.0.9svn)
+Target: armv7-none-linux-android28
+Thread model: posix
+InstalledDir: /Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin
+Found candidate GCC installation: /Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/lib/gcc/arm-linux-androideabi/4.9.x
+Selected GCC installation: /Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/lib/gcc/arm-linux-androideabi/4.9.x
+Candidate multilib: thumb;@mthumb
+Candidate multilib: armv7-a;@march=armv7-a
+Candidate multilib: armv7-a/thumb;@march=armv7-a@mthumb
+Candidate multilib: .;
+Selected multilib: armv7-a/thumb;@march=armv7-a@mthumb
+ninja: build stopped: subcommand failed.
+
+
+
+
+Determining if the CXX compiler works failed with the following output:
+Change Dir: /Users/lzj/code/opencv-studytest/opencv/.cxx/Debug/2v464p73/armeabi-v7a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/Users/lzj/Library/Android/sdk/cmake/3.18.1/bin/ninja cmTC_14364 && [1/2] Building CXX object CMakeFiles/cmTC_14364.dir/testCXXCompiler.cxx.o
+FAILED: CMakeFiles/cmTC_14364.dir/testCXXCompiler.cxx.o 
+/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=armv7-none-linux-androideabi28 --gcc-toolchain=/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64 --sysroot=/Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/sysroot   -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security  -fno-typed-cxx-new-delete  -fPIE -MD -MT CMakeFiles/cmTC_14364.dir/testCXXCompiler.cxx.o -MF CMakeFiles/cmTC_14364.dir/testCXXCompiler.cxx.o.d -o CMakeFiles/cmTC_14364.dir/testCXXCompiler.cxx.o -c testCXXCompiler.cxx
+clang++: error: unknown argument: '-fno-typed-cxx-new-delete'
+ninja: build stopped: subcommand failed.
+
+
+
