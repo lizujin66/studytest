@@ -1,3 +1,0 @@
-/Users/lzj/code/opencv-studytest/opencv/.cxx/RelWithDebInfo/1w282e33/x86/CMakeFiles/rebuild_cache.dir
-/Users/lzj/code/opencv-studytest/opencv/.cxx/RelWithDebInfo/1w282e33/x86/CMakeFiles/edit_cache.dir
-/Users/lzj/code/opencv-studytest/opencv/.cxx/RelWithDebInfo/1w282e33/x86/CMakeFiles/opencv_jni_shared.dir

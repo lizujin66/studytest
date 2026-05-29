@@ -10,8 +10,21 @@ import com.google.zxing.ResultPoint;
 import com.king.zxing.DecodeFormatManager;
 import com.king.zxing.util.CodeUtils;
 
+import net.sourceforge.zbar.ImageScanner;
+import net.sourceforge.zbar.Image;
+import net.sourceforge.zbar.Config;
+import net.sourceforge.zbar.SymbolSet;
+import net.sourceforge.zbar.Symbol;
+import com.king.wechat.qrcode.WeChatQRCodeDetector;
+
+import java.util.List;
+
 public class ArcQRDetecter {
     private static final String TAG = "ArcQRDetecter";
+
+    public static final int DECODE_ZXING = 0;
+    public static final int DECODE_ZBAR = 1;
+    public static final int DECODE_WECHAT = 2;
 
     public static Bitmap postProcessBitmap(Bitmap bitmapShow,ResultPoint[] resPoints){
         Log.d(TAG,"postProcessBitmap");
@@ -160,14 +173,14 @@ public class ArcQRDetecter {
         return qrBitmapShow;
     }
 
-    public static ResultPoint[] detectQRCode(Bitmap bitmap){
+    public static ResultPoint[] detectQRCode(Bitmap bitmap, int decodeType){
         Log.d(TAG,"detectQRCode() in");
         ResultPoint[] resPoints = null;
         boolean findQRCode = false;
         if (bitmap != null){
             bitmap = imageEnhancement(bitmap);
             //showOrigImage(bitmap);
-            resPoints = parseQRcode(bitmap);
+            resPoints = parseQRcode(bitmap, decodeType);
             if(resPoints!= null){
                 findQRCode = true;
             }
@@ -176,20 +189,82 @@ public class ArcQRDetecter {
         return resPoints;
     }
 
-    public static ResultPoint[] parseQRcode(Bitmap bitmap) {
-        Log.d(TAG, "parseQRcode in");
+    public static ResultPoint[] parseQRcode(Bitmap bitmap, int decodeType) {
+        Log.d(TAG, "parseQRcode in, type=" + decodeType);
         boolean find = false;
         ResultPoint[] resPoints = null;
-        Result rest = CodeUtils.parseCodeResult(bitmap, DecodeFormatManager.QR_CODE_HINTS);
-        if (rest != null) {
-            resPoints = rest.getResultPoints();
-            for (int i = 0; i < resPoints.length; i++) {
-                Log.d(TAG, "parseQRcode out points[" + i + "] = " + "[x = " + resPoints[i].getX() + ", y = " + resPoints[i].getY() + "]");
+        
+        if (decodeType == DECODE_ZXING) {
+            Result rest = CodeUtils.parseCodeResult(bitmap, DecodeFormatManager.QR_CODE_HINTS);
+            if (rest != null) {
+                resPoints = rest.getResultPoints();
+                find = true;
+                Log.d(TAG, "parseQRcode out ZXing text = " + rest.getText());
             }
-            Log.d(TAG, "parseQRcode out test = " + rest.getText());
-            find = true;
-            //resPoints = points;
+        } else if (decodeType == DECODE_ZBAR) {
+            try {
+                ImageScanner scanner = new ImageScanner();
+                scanner.setConfig(0, Config.X_DENSITY, 3);
+                scanner.setConfig(0, Config.Y_DENSITY, 3);
+                
+                int width = bitmap.getWidth();
+                int height = bitmap.getHeight();
+                int[] pixels = new int[width * height];
+                bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+                byte[] barcode = new byte[width * height];
+                for (int i = 0; i < pixels.length; i++) {
+                    barcode[i] = (byte) (((pixels[i] >> 16) & 0xFF) * 0.299 + ((pixels[i] >> 8) & 0xFF) * 0.587 + (pixels[i] & 0xFF) * 0.114);
+                }
+                
+                Image barcodeImage = new Image(width, height, "Y800");
+                barcodeImage.setData(barcode);
+                int result = scanner.scanImage(barcodeImage);
+
+                if (result != 0) {
+                    SymbolSet syms = scanner.getResults();
+                    for (Symbol sym : syms) {
+                        String resultStr = sym.getData();
+                        if (resultStr != null && !resultStr.isEmpty()) {
+                            resPoints = new ResultPoint[] {
+                                new ResultPoint(0, 0),
+                                new ResultPoint(width, 0),
+                                new ResultPoint(width, height),
+                                new ResultPoint(0, height)
+                            };
+                            Log.d(TAG, "parseQRcode out ZBar text = " + resultStr);
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "ZBar error", e);
+            }
+        } else if (decodeType == DECODE_WECHAT) {
+            try {
+                // WeChatQRCodeDetector returns list of results
+                List<String> results = WeChatQRCodeDetector.detectAndDecode(bitmap);
+                if (results != null && !results.isEmpty()) {
+                    // Similar to ZBar, WeChatQRCodeDetector might not return points in the easy wrapper
+                    // We just use corners for the bounding box.
+                    resPoints = new ResultPoint[] {
+                        new ResultPoint(0, 0),
+                        new ResultPoint(bitmap.getWidth(), 0),
+                        new ResultPoint(bitmap.getWidth(), bitmap.getHeight()),
+                        new ResultPoint(0, bitmap.getHeight())
+                    };
+                    Log.d(TAG, "parseQRcode out WeChat text = " + results.get(0));
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "WeChat error", e);
+            }
         }
+
+        if (resPoints != null) {
+            for (int i = 0; i < resPoints.length; i++) {
+                Log.d(TAG, "parseQRcode out points[" + i + "] = [x = " + resPoints[i].getX() + ", y = " + resPoints[i].getY() + "]");
+            }
+        }
+
         Log.d(TAG, "parseQRcode out");
         return resPoints;
     }

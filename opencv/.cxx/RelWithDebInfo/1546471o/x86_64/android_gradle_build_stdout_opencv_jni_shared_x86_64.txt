@@ -1,0 +1,2 @@
+ninja: Entering directory `/Users/lzj/code/studytest/opencv/.cxx/RelWithDebInfo/1546471o/x86_64'
+ninja: no work to do.

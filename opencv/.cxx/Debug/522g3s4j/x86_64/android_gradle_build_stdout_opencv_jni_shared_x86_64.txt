@@ -1,8 +1,0 @@
-ninja: Entering directory `/Users/lzj/code/opencv-studytest/opencv/.cxx/Debug/522g3s4j/x86_64'
-[1/2] Building CXX object CMakeFiles/opencv_jni_shared.dir/dummy.cpp.o
-[2/2] Linking CXX static library libopencv_jni_shared.a
-FAILED: libopencv_jni_shared.a 
-: && /Users/lzj/Library/Android/sdk/cmake/3.18.1/bin/cmake -E rm -f libopencv_jni_shared.a && /Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/x86_64-linux-android-ar qc libopencv_jni_shared.a  CMakeFiles/opencv_jni_shared.dir/dummy.cpp.o && /Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/x86_64-linux-android-ranlib libopencv_jni_shared.a && /Users/lzj/Library/Android/sdk/cmake/3.18.1/bin/cmake -E touch libopencv_jni_shared.a && :
-libc++abi: Terminating due to typed operator new being invoked before its static initializer in libcxx has been executed. This is likely happening in code with -ftyped-cxx-new-delete enabled and statically linking against libc++abi. If that is the case, and you cannot avoid invoking operator new in a static initializer, please try disabling TMO for that code with -fno-typed-cxx-new-delete. Otherwise, please file a bug report against libc++.
-/bin/sh: line 1: 46711 Abort trap: 6           /Users/lzj/Library/Android/sdk/ndk/21.4.7075529/toolchains/llvm/prebuilt/darwin-x86_64/bin/x86_64-linux-android-ar qc libopencv_jni_shared.a CMakeFiles/opencv_jni_shared.dir/dummy.cpp.o
-ninja: build stopped: subcommand failed.

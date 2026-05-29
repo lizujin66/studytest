@@ -27,10 +27,15 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.net.Uri;
 
 import com.google.zxing.ResultPoint;
 
@@ -69,8 +74,19 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
     private static final int HANDLER_MSG_RESIZE_SURFACEVIEW = 1050;
     private static final int HANDLER_MSG_IMAGE_SHOW_DIALOG = 1060;
 
+    private static final int REQUEST_CODE_VIDEO = 1001;
+
     private Button btnStart;
     private Button btnRefresh;
+    private Button btnSelectVideo;
+    private RadioGroup rgMode;
+    private RadioButton rbCamera;
+    private RadioButton rbVideo;
+    private Spinner spinnerDecoder;
+    private VideoDecoder mVideoDecoder;
+    private Uri mSelectedVideoUri;
+    private boolean isVideoMode = false;
+
     private int frameCount = 0;
     private boolean findQRCode = false;
     private Display mWindowDisplay = null;
@@ -111,14 +127,57 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
         loadNatvieLibs();
+        com.king.wechat.qrcode.WeChatQRCodeDetector.init(this);
+        
+        mVideoDecoder = new VideoDecoder(this);
+        mVideoDecoder.setFrameCallback(this);
+
+        rgMode = findViewById(R.id.rg_mode);
+        rbCamera = findViewById(R.id.rb_camera);
+        rbVideo = findViewById(R.id.rb_video);
+        btnSelectVideo = findViewById(R.id.btn_select_video);
+        spinnerDecoder = findViewById(R.id.spinner_decoder);
+
+        String[] decoders = {"ZXing", "ZBar", "WeChat"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, decoders);
+        spinnerDecoder.setAdapter(adapter);
+
+        rgMode.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rb_video) {
+                isVideoMode = true;
+                btnSelectVideo.setVisibility(View.VISIBLE);
+                if (mArcCamera2 != null) {
+                    mArcCamera2.releaseCamera();
+                    mArcCamera2 = null;
+                }
+            } else {
+                isVideoMode = false;
+                btnSelectVideo.setVisibility(View.GONE);
+                mVideoDecoder.stopDecode();
+            }
+        });
+
+        btnSelectVideo.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("video/*");
+            startActivityForResult(intent, REQUEST_CODE_VIDEO);
+        });
+
         btnStart = findViewById(R.id.start1);
         btnStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG,"onClick start button");
-                if (mArcCamera2 == null) {
-                    mRefreshHandler.sendEmptyMessageDelayed(HANDLER_MSG_START_CAMERA,500);
-                    updateRefreshButtonStatus(false);
+                if (isVideoMode) {
+                    if (mSelectedVideoUri != null) {
+                        mVideoDecoder.startDecode(mSelectedVideoUri);
+                        updateRefreshButtonStatus(false);
+                    }
+                } else {
+                    if (mArcCamera2 == null) {
+                        mRefreshHandler.sendEmptyMessageDelayed(HANDLER_MSG_START_CAMERA,500);
+                        updateRefreshButtonStatus(false);
+                    }
                 }
             }
         });
@@ -180,6 +239,11 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_VIDEO && resultCode == RESULT_OK && data != null) {
+            mSelectedVideoUri = data.getData();
+            Log.d(TAG, "Selected video: " + mSelectedVideoUri);
+            return;
+        }
         //拒绝时，没有获取到主要权限，无法运行，关闭页面
         if (requestCode == REQUEST_CODE) {
             if (resultCode == PermissionActivity.PERMISSION_DENIEG) {
@@ -364,7 +428,11 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
             showSelectedImage(bitmap);
             bitmap = ArcQRDetecter.imageEnhancement(bitmap);
             //showOrigImage(bitmap);
-            resPoints = ArcQRDetecter.parseQRcode(bitmap);
+            int decodeType = 0; // Default to ZXing
+            if (spinnerDecoder != null) {
+                decodeType = spinnerDecoder.getSelectedItemPosition();
+            }
+            resPoints = ArcQRDetecter.parseQRcode(bitmap, decodeType);
             if(resPoints != null){
                 bitmapShow = bitmap;
                 mRefreshHandler.sendEmptyMessageDelayed(HANDLER_MSG_IMAGE_POSTPROCESS,10);

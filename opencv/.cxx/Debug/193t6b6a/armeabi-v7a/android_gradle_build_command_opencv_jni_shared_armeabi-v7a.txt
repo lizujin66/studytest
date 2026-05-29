@@ -1,0 +1,7 @@
+Executable : /Users/lzj/Library/Android/sdk/cmake/3.18.1/bin/ninja
+arguments : 
+-C
+/Users/lzj/code/studytest/opencv/.cxx/Debug/193t6b6a/armeabi-v7a
+opencv_jni_shared
+jvmArgs : 
+
