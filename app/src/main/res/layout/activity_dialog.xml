@@ -8,8 +8,20 @@
         android:id="@+id/imageV"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/btnClose"
+        android:layout_above="@+id/tvResults"
         android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/tvResults"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/btnClose"
+        android:padding="16dp"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:background="#88000000"
+        android:gravity="center"
+        android:text=""/>
 
     <Button
         android:id="@+id/btnClose"

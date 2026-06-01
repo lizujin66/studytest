@@ -269,6 +269,72 @@ public class ArcQRDetecter {
         return resPoints;
     }
 
+    public static String testAllDecoders(Bitmap bitmap) {
+        StringBuilder resultStr = new StringBuilder();
+        
+        // 1. ZXing
+        long start = System.currentTimeMillis();
+        boolean zxingSuccess = false;
+        try {
+            Result rest = CodeUtils.parseCodeResult(bitmap, DecodeFormatManager.QR_CODE_HINTS);
+            if (rest != null && rest.getText() != null && !rest.getText().isEmpty()) {
+                zxingSuccess = true;
+            }
+        } catch (Exception e) {
+        }
+        long zxingTime = System.currentTimeMillis() - start;
+        resultStr.append("ZXing: ").append(zxingSuccess ? "成功" : "失败").append(" (").append(zxingTime).append("ms)\n");
+
+        // 2. ZBar
+        start = System.currentTimeMillis();
+        boolean zbarSuccess = false;
+        try {
+            ImageScanner scanner = new ImageScanner();
+            scanner.setConfig(0, Config.X_DENSITY, 3);
+            scanner.setConfig(0, Config.Y_DENSITY, 3);
+            int width = bitmap.getWidth();
+            int height = bitmap.getHeight();
+            int[] pixels = new int[width * height];
+            bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+            byte[] barcode = new byte[width * height];
+            for (int i = 0; i < pixels.length; i++) {
+                barcode[i] = (byte) (((pixels[i] >> 16) & 0xFF) * 0.299 + ((pixels[i] >> 8) & 0xFF) * 0.587 + (pixels[i] & 0xFF) * 0.114);
+            }
+            Image barcodeImage = new Image(width, height, "Y800");
+            barcodeImage.setData(barcode);
+            int result = scanner.scanImage(barcodeImage);
+            if (result != 0) {
+                SymbolSet syms = scanner.getResults();
+                for (Symbol sym : syms) {
+                    String data = sym.getData();
+                    if (data != null && !data.isEmpty()) {
+                        zbarSuccess = true;
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+        }
+        long zbarTime = System.currentTimeMillis() - start;
+        resultStr.append("ZBar: ").append(zbarSuccess ? "成功" : "失败").append(" (").append(zbarTime).append("ms)\n");
+
+        // 3. WeChat
+        start = System.currentTimeMillis();
+        boolean wechatSuccess = false;
+        try {
+            List<String> results = WeChatQRCodeDetector.detectAndDecode(bitmap);
+            if (results != null && !results.isEmpty()) {
+                wechatSuccess = true;
+            }
+        } catch (Exception e) {
+        }
+        long wechatTime = System.currentTimeMillis() - start;
+        resultStr.append("WeChat: ").append(wechatSuccess ? "成功" : "失败").append(" (").append(wechatTime).append("ms)");
+
+        return resultStr.toString();
+    }
+
+
     public static Bitmap imageEnhancement(Bitmap bitmap){
         Log.d(TAG,"imageEnhancement in");
         Bitmap curBitmap = null;

@@ -36,6 +36,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.net.Uri;
+import android.widget.TextView;
 
 import com.google.zxing.ResultPoint;
 
@@ -602,6 +603,12 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
         ImageView imageView = dialog.findViewById(R.id.imageV);
         imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imageView.setImageBitmap(bitmap);
+
+        TextView tvResults = dialog.findViewById(R.id.tvResults);
+        if (tvResults != null) {
+            String decodeResult = ArcQRDetecter.testAllDecoders(bitmap);
+            tvResults.setText(decodeResult);
+        }
 
         Button btnClose = dialog.findViewById(R.id.btnClose);
         btnClose.setOnClickListener(new View.OnClickListener() {
