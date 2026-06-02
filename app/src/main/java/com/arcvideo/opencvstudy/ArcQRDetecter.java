@@ -25,6 +25,7 @@ public class ArcQRDetecter {
     public static final int DECODE_ZXING = 0;
     public static final int DECODE_ZBAR = 1;
     public static final int DECODE_WECHAT = 2;
+    public static final int DECODE_OPENCV_DETECT = 3;
 
     public static Bitmap postProcessBitmap(Bitmap bitmapShow,ResultPoint[] resPoints){
         Log.d(TAG,"postProcessBitmap");
@@ -256,6 +257,36 @@ public class ArcQRDetecter {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "WeChat error", e);
+            }
+        } else if (decodeType == DECODE_OPENCV_DETECT) {
+            try {
+                org.opencv.core.Mat img = new org.opencv.core.Mat();
+                org.opencv.android.Utils.bitmapToMat(bitmap, img);
+                org.opencv.core.Mat gray = new org.opencv.core.Mat();
+                org.opencv.imgproc.Imgproc.cvtColor(img, gray, org.opencv.imgproc.Imgproc.COLOR_BGR2GRAY);
+
+                org.opencv.objdetect.QRCodeDetector detector = new org.opencv.objdetect.QRCodeDetector();
+                org.opencv.core.Mat points = new org.opencv.core.Mat();
+                boolean found = detector.detect(gray, points);
+
+                if (found && !points.empty()) {
+                    int total = (int) (points.total() * points.channels());
+                    if (total >= 8) {
+                        float[] data = new float[total];
+                        points.get(0, 0, data);
+                        resPoints = new ResultPoint[4];
+                        for (int i = 0; i < 4; i++) {
+                            resPoints[i] = new ResultPoint(data[i*2], data[i*2 + 1]);
+                        }
+                        Log.d(TAG, "parseQRcode out OpenCV detect successful");
+                    }
+                }
+
+                img.release();
+                gray.release();
+                points.release();
+            } catch (Exception e) {
+                Log.e(TAG, "OpenCV Detect error", e);
             }
         }
 

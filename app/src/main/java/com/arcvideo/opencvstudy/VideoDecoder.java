@@ -19,7 +19,6 @@ public class VideoDecoder {
     private Context mContext;
     private MediaExtractor mExtractor;
     private MediaCodec mDecoder;
-    private ImageReader mImageReader;
     private ArcFrameDataCallBack mFrameCallback;
     private volatile boolean mIsRunning = false;
     private Thread mDecodeThread;
@@ -88,20 +87,9 @@ public class VideoDecoder {
         mVideoWidth = format.getInteger(MediaFormat.KEY_WIDTH);
         mVideoHeight = format.getInteger(MediaFormat.KEY_HEIGHT);
 
-        // 初始化 ImageReader，格式为 YUV_420_888
-        mImageReader = ImageReader.newInstance(mVideoWidth, mVideoHeight, ImageFormat.YUV_420_888, 2);
-        mImageReader.setOnImageAvailableListener(reader -> {
-            Image image = reader.acquireLatestImage();
-            if (image != null) {
-                processImage(image);
-                image.close();
-            }
-        }, null);
-
         String mime = format.getString(MediaFormat.KEY_MIME);
         mDecoder = MediaCodec.createDecoderByType(mime);
-        Surface surface = mImageReader.getSurface();
-        mDecoder.configure(format, surface, null, 0);
+        mDecoder.configure(format, null, null, 0);
         mDecoder.start();
     }
 
@@ -117,9 +105,14 @@ public class VideoDecoder {
                     ByteBuffer buffer = mDecoder.getInputBuffer(inIndex);
                     int sampleSize = mExtractor.readSampleData(buffer, 0);
                     if (sampleSize < 0) {
-                        mDecoder.queueInputBuffer(inIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
-                        isEOS = true;
-                    } else {
+                        mExtractor.seekTo(0, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+                        sampleSize = mExtractor.readSampleData(buffer, 0);
+                        try {
+                            mDecoder.flush();
+                        } catch (Exception e) {}
+                        startMs = System.currentTimeMillis();
+                    }
+                    if (sampleSize >= 0) {
                         mDecoder.queueInputBuffer(inIndex, 0, sampleSize, mExtractor.getSampleTime(), 0);
                         mExtractor.advance();
                     }
@@ -138,8 +131,13 @@ public class VideoDecoder {
                     }
                 }
 
-                // 释放给Surface (这会触发ImageReader的onImageAvailable)
-                mDecoder.releaseOutputBuffer(outIndex, true);
+                Image image = mDecoder.getOutputImage(outIndex);
+                if (image != null) {
+                    processImage(image);
+                    image.close();
+                }
+
+                mDecoder.releaseOutputBuffer(outIndex, false);
 
                 if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
                     break;
@@ -224,10 +222,6 @@ public class VideoDecoder {
         if (mExtractor != null) {
             mExtractor.release();
             mExtractor = null;
-        }
-        if (mImageReader != null) {
-            mImageReader.close();
-            mImageReader = null;
         }
     }
 }

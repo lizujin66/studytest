@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
 
     private Button btnStart;
     private Button btnRefresh;
+    private Button btnStop;
     private Button btnSelectVideo;
     private RadioGroup rgMode;
     private RadioButton rbCamera;
@@ -139,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
         btnSelectVideo = findViewById(R.id.btn_select_video);
         spinnerDecoder = findViewById(R.id.spinner_decoder);
 
-        String[] decoders = {"ZXing", "ZBar", "WeChat"};
+        String[] decoders = {"ZXing", "ZBar", "WeChat", "OpenCV(仅定位)"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, decoders);
         spinnerDecoder.setAdapter(adapter);
 
@@ -147,14 +148,30 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
             if (checkedId == R.id.rb_video) {
                 isVideoMode = true;
                 btnSelectVideo.setVisibility(View.VISIBLE);
+                btnStop.setVisibility(View.VISIBLE);
                 if (mArcCamera2 != null) {
                     mArcCamera2.releaseCamera();
                     mArcCamera2 = null;
                 }
+                ImageView iv0 = findViewById(R.id.imageView0);
+                if (iv0 != null) {
+                    iv0.setVisibility(View.VISIBLE);
+                }
+                if (surfaceView != null) {
+                    surfaceView.setVisibility(View.GONE);
+                }
             } else {
                 isVideoMode = false;
                 btnSelectVideo.setVisibility(View.GONE);
+                btnStop.setVisibility(View.GONE);
                 mVideoDecoder.stopDecode();
+                ImageView iv0 = findViewById(R.id.imageView0);
+                if (iv0 != null) {
+                    iv0.setVisibility(View.GONE);
+                }
+                if (surfaceView != null) {
+                    surfaceView.setVisibility(View.VISIBLE);
+                }
             }
         });
 
@@ -194,6 +211,25 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
                 }
                 findQRCode = false;
                 updateRefreshButtonStatus(false);
+            }
+        });
+
+        btnStop = findViewById(R.id.btn_stop);
+        btnStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG,"onClick stop button");
+                if (isVideoMode) {
+                    mVideoDecoder.stopDecode();
+                    if (imgView != null) {
+                        imgView.setImageDrawable(null);
+                    }
+                    if (imgViewOrg != null) {
+                        imgViewOrg.setImageDrawable(null);
+                    }
+                    updateRefreshButtonStatus(true);
+                    findQRCode = false;
+                }
             }
         });
 
@@ -353,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
     }
     private void showQRCodeCropImage(Bitmap bitmap){
         Log.d(TAG,"showQRCodeCropImage in");
-        Mat src = new Mat(bitmap.getWidth(),bitmap.getHeight(), CvType.CV_8UC(3));
+        Mat src = new Mat();
         Utils.bitmapToMat(bitmap,src);
         Imgproc.cvtColor(src,src,Imgproc.COLOR_BGR2GRAY);
         Utils.matToBitmap(src,bitmap);
@@ -400,6 +436,12 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
     @Override
     public void onFrame(ArcVFrame vFrame) {
         Log.d(TAG,"onFrame width = " +  vFrame.mFrameWidth + ", height = " + vFrame.mFrameHeight);
+        if (isVideoMode) {
+            Bitmap bitmap = YuvToBitmap(vFrame);
+            if (bitmap != null) {
+                runOnUiThread(() -> showOrigImage(bitmap));
+            }
+        }
         if (frameCount % 30 == 0 && !findQRCode){
             synchronized (mVFrameLock){
                 mCurrentVFrame = vFrame;
@@ -483,8 +525,10 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
     public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
         Log.d(TAG,"surfaceDestroyed");
         bSurfaceCreated = false;
-        mArcCamera2.releaseCamera();
-        mArcCamera2 = null;
+        if (mArcCamera2 != null) {
+            mArcCamera2.releaseCamera();
+            mArcCamera2 = null;
+        }
         bFirstFrame = true;
         findQRCode = false;
     }
@@ -631,7 +675,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
 
     private Bitmap adaptiveBrightnessAdjustment(Bitmap inBitmap) {
         Log.d(TAG,"adaptiveBrightnessAdjustment in");
-        Mat rgbMt = new Mat(inBitmap.getWidth(),inBitmap.getHeight(), CvType.CV_8UC(3));
+        Mat rgbMt = new Mat();
         Mat yuvMt = new Mat();
         Mat outputImageMt = new Mat();
         Utils.bitmapToMat(inBitmap,rgbMt);
@@ -685,7 +729,7 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
      */
     private Bitmap adaptiveContrastAdjustment(Bitmap inBitmap,double alpha, int beta ){
         Log.d(TAG,"adaptiveContrastAdjustment in");
-        Mat rgbMt = new Mat(inBitmap.getWidth(),inBitmap.getHeight(), CvType.CV_8UC(3));
+        Mat rgbMt = new Mat();
         Mat outputImageMt = new Mat();
         Utils.bitmapToMat(inBitmap,rgbMt);
         Log.d(TAG,"adaptiveContrastAdjustment bitmapToMat");
