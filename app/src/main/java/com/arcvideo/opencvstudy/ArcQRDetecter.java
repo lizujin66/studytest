@@ -27,10 +27,107 @@ public class ArcQRDetecter {
     public static final int DECODE_WECHAT = 2;
     public static final int DECODE_OPENCV_DETECT = 3;
 
+    private static ResultPoint[] sortPoints(ResultPoint[] points) {
+        ResultPoint[] sorted = new ResultPoint[4];
+        float minSum = Float.MAX_VALUE;
+        float maxSum = -Float.MAX_VALUE;
+        float minDiff = Float.MAX_VALUE;
+        float maxDiff = -Float.MAX_VALUE;
+        
+        ResultPoint tl = null, tr = null, br = null, bl = null;
+        for (ResultPoint p : points) {
+            float sum = p.getX() + p.getY();
+            float diff = p.getY() - p.getX();
+            if (sum < minSum) {
+                minSum = sum;
+                tl = p;
+            }
+            if (sum > maxSum) {
+                maxSum = sum;
+                br = p;
+            }
+            if (diff < minDiff) {
+                minDiff = diff;
+                tr = p;
+            }
+            if (diff > maxDiff) {
+                maxDiff = diff;
+                bl = p;
+            }
+        }
+        sorted[0] = tl;
+        sorted[1] = tr;
+        sorted[2] = br;
+        sorted[3] = bl;
+        return sorted;
+    }
+
     public static Bitmap postProcessBitmap(Bitmap bitmapShow,ResultPoint[] resPoints){
         Log.d(TAG,"postProcessBitmap");
         Bitmap qrBitmapShow = null;
         if (resPoints != null){
+            try {
+                ResultPoint[] sortedPoints = new ResultPoint[4];
+                if (resPoints.length == 3) {
+                    // ZXing points: 0 is bottom-left, 1 is top-left, 2 is top-right.
+                    sortedPoints[0] = resPoints[1]; // top-left
+                    sortedPoints[1] = resPoints[2]; // top-right
+                    sortedPoints[2] = new ResultPoint(
+                        resPoints[0].getX() + resPoints[2].getX() - resPoints[1].getX(),
+                        resPoints[0].getY() + resPoints[2].getY() - resPoints[1].getY()
+                    ); // bottom-right estimate
+                    sortedPoints[3] = resPoints[0]; // bottom-left
+                } else if (resPoints.length >= 4) {
+                    sortedPoints = sortPoints(resPoints);
+                }
+
+                if (sortedPoints[0] != null && sortedPoints[1] != null && sortedPoints[2] != null && sortedPoints[3] != null) {
+                    int destSize = 400; // standard rectified size
+                    int margin = 40; // white quiet zone margin to improve decoding
+                    int actualQrSize = destSize - 2 * margin;
+
+                    org.opencv.core.Mat srcMat = new org.opencv.core.Mat();
+                    org.opencv.android.Utils.bitmapToMat(bitmapShow, srcMat);
+
+                    org.opencv.core.Point[] srcPts = new org.opencv.core.Point[4];
+                    for (int i = 0; i < 4; i++) {
+                        srcPts[i] = new org.opencv.core.Point(sortedPoints[i].getX(), sortedPoints[i].getY());
+                    }
+                    org.opencv.core.MatOfPoint2f srcPtsMat = new org.opencv.core.MatOfPoint2f(srcPts);
+
+                    org.opencv.core.Point[] dstPts = new org.opencv.core.Point[]{
+                        new org.opencv.core.Point(margin, margin),
+                        new org.opencv.core.Point(margin + actualQrSize, margin),
+                        new org.opencv.core.Point(margin + actualQrSize, margin + actualQrSize),
+                        new org.opencv.core.Point(margin, margin + actualQrSize)
+                    };
+                    org.opencv.core.MatOfPoint2f dstPtsMat = new org.opencv.core.MatOfPoint2f(dstPts);
+
+                    org.opencv.core.Mat perspectiveTransform = org.opencv.imgproc.Imgproc.getPerspectiveTransform(srcPtsMat, dstPtsMat);
+                    org.opencv.core.Mat warpedMat = new org.opencv.core.Mat(destSize, destSize, srcMat.type());
+                    
+                    // Fill with white color for quiet zone
+                    warpedMat.setTo(new org.opencv.core.Scalar(255, 255, 255));
+                    
+                    org.opencv.imgproc.Imgproc.warpPerspective(srcMat, warpedMat, perspectiveTransform, new org.opencv.core.Size(destSize, destSize), org.opencv.imgproc.Imgproc.INTER_LINEAR, org.opencv.core.Core.BORDER_CONSTANT, new org.opencv.core.Scalar(255, 255, 255));
+
+                    Bitmap warpedBitmap = Bitmap.createBitmap(destSize, destSize, Bitmap.Config.ARGB_8888);
+                    org.opencv.android.Utils.matToBitmap(warpedMat, warpedBitmap);
+
+                    srcMat.release();
+                    warpedMat.release();
+                    perspectiveTransform.release();
+                    srcPtsMat.release();
+                    dstPtsMat.release();
+
+                    qrBitmapShow = imageEnhancement(warpedBitmap);
+                    Log.d(TAG, "postProcessBitmap perspective warp successful");
+                    return qrBitmapShow;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Perspective warp failed, fallback to bounding box crop", e);
+            }
+
             float maxX = 0.0f;
             float minX = 0.0f;
             float maxY = 0.0f;
@@ -168,8 +265,6 @@ public class ArcQRDetecter {
             Bitmap corpBitmap = Bitmap.createBitmap(bitmapShow,startX,startY,corpWidth,corpHeight);
             qrBitmapShow = imageEnhancement(corpBitmap);
             Log.d(TAG,"postProcessBitmap, bitmap width = " + corpBitmap.getWidth() + ", height = " + corpBitmap.getHeight());
-            //to do image enhance
-
         }
         return qrBitmapShow;
     }
