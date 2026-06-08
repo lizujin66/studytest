@@ -649,9 +649,39 @@ public class MainActivity extends AppCompatActivity implements Handler.Callback,
         imageView.setImageBitmap(bitmap);
 
         TextView tvResults = dialog.findViewById(R.id.tvResults);
+        ImageView imageZXing = dialog.findViewById(R.id.imageZXing);
+        ImageView imageZBar = dialog.findViewById(R.id.imageZBar);
+        ImageView imageWeChat = dialog.findViewById(R.id.imageWeChat);
+
+        View llZXing = dialog.findViewById(R.id.llZXing);
+        View llZBar = dialog.findViewById(R.id.llZBar);
+        View llWeChat = dialog.findViewById(R.id.llWeChat);
+
         if (tvResults != null) {
-            String decodeResult = ArcQRDetecter.testAllDecoders(bitmap);
-            tvResults.setText(decodeResult);
+            Object[] result = ArcQRDetecter.testAllDecodersAndGenerateQR(bitmap);
+            tvResults.setText((String)result[0]);
+            
+            try {
+                if (result[1] != null && imageZXing != null) {
+                    imageZXing.setImageBitmap((Bitmap)result[1]);
+                } else if (llZXing != null) {
+                    llZXing.setVisibility(View.INVISIBLE);
+                }
+
+                if (result[2] != null && imageZBar != null) {
+                    imageZBar.setImageBitmap((Bitmap)result[2]);
+                } else if (llZBar != null) {
+                    llZBar.setVisibility(View.INVISIBLE);
+                }
+
+                if (result[3] != null && imageWeChat != null) {
+                    imageWeChat.setImageBitmap((Bitmap)result[3]);
+                } else if (llWeChat != null) {
+                    llWeChat.setVisibility(View.INVISIBLE);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         Button btnClose = dialog.findViewById(R.id.btnClose);

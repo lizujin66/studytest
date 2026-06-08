@@ -395,25 +395,45 @@ public class ArcQRDetecter {
         return resPoints;
     }
 
-    public static String testAllDecoders(Bitmap bitmap) {
+    public static Object[] testAllDecodersAndGenerateQR(Bitmap bitmap) {
         StringBuilder resultStr = new StringBuilder();
+        Bitmap zxingQr = null;
+        Bitmap zbarQr = null;
+        Bitmap wechatQr = null;
+        String zxingText = null;
+        String zbarText = null;
+        String wechatText = null;
+        int qrSize = 400;
         
         // 1. ZXing
         long start = System.currentTimeMillis();
         boolean zxingSuccess = false;
+        long zxingGenTime = 0;
         try {
             Result rest = CodeUtils.parseCodeResult(bitmap, DecodeFormatManager.QR_CODE_HINTS);
             if (rest != null && rest.getText() != null && !rest.getText().isEmpty()) {
                 zxingSuccess = true;
+                zxingText = rest.getText();
             }
         } catch (Exception e) {
         }
         long zxingTime = System.currentTimeMillis() - start;
-        resultStr.append("ZXing: ").append(zxingSuccess ? "成功" : "失败").append(" (").append(zxingTime).append("ms)\n");
+        
+        if (zxingSuccess) {
+            long genStart = System.currentTimeMillis();
+            try {
+                zxingQr = CodeUtils.createQRCode(zxingText, qrSize, null);
+            } catch (Exception e) {}
+            zxingGenTime = System.currentTimeMillis() - genStart;
+            resultStr.append("ZXing: 成功 (解码:").append(zxingTime).append("ms, 生成:").append(zxingGenTime).append("ms)\n");
+        } else {
+            resultStr.append("ZXing: 失败 (").append(zxingTime).append("ms)\n");
+        }
 
         // 2. ZBar
         start = System.currentTimeMillis();
         boolean zbarSuccess = false;
+        long zbarGenTime = 0;
         try {
             ImageScanner scanner = new ImageScanner();
             scanner.setConfig(0, Config.X_DENSITY, 3);
@@ -435,6 +455,7 @@ public class ArcQRDetecter {
                     String data = sym.getData();
                     if (data != null && !data.isEmpty()) {
                         zbarSuccess = true;
+                        zbarText = data;
                         break;
                     }
                 }
@@ -442,22 +463,54 @@ public class ArcQRDetecter {
         } catch (Exception e) {
         }
         long zbarTime = System.currentTimeMillis() - start;
-        resultStr.append("ZBar: ").append(zbarSuccess ? "成功" : "失败").append(" (").append(zbarTime).append("ms)\n");
+
+        if (zbarSuccess) {
+            long genStart = System.currentTimeMillis();
+            try {
+                zbarQr = CodeUtils.createQRCode(zbarText, qrSize, null);
+            } catch (Exception e) {}
+            zbarGenTime = System.currentTimeMillis() - genStart;
+            resultStr.append("ZBar: 成功 (解码:").append(zbarTime).append("ms, 生成:").append(zbarGenTime).append("ms)\n");
+        } else {
+            resultStr.append("ZBar: 失败 (").append(zbarTime).append("ms)\n");
+        }
 
         // 3. WeChat
         start = System.currentTimeMillis();
         boolean wechatSuccess = false;
+        long wechatGenTime = 0;
         try {
             List<String> results = WeChatQRCodeDetector.detectAndDecode(bitmap);
             if (results != null && !results.isEmpty()) {
                 wechatSuccess = true;
+                wechatText = results.get(0);
             }
         } catch (Exception e) {
         }
         long wechatTime = System.currentTimeMillis() - start;
-        resultStr.append("WeChat: ").append(wechatSuccess ? "成功" : "失败").append(" (").append(wechatTime).append("ms)");
 
-        return resultStr.toString();
+        if (wechatSuccess) {
+            long genStart = System.currentTimeMillis();
+            try {
+                wechatQr = CodeUtils.createQRCode(wechatText, qrSize, null);
+            } catch (Exception e) {}
+            wechatGenTime = System.currentTimeMillis() - genStart;
+            resultStr.append("WeChat: 成功 (解码:").append(wechatTime).append("ms, 生成:").append(wechatGenTime).append("ms)");
+        } else {
+            resultStr.append("WeChat: 失败 (").append(wechatTime).append("ms)");
+        }
+
+        if (zxingText != null) {
+            resultStr.append("\nZXing内容: ").append(zxingText);
+        }
+        if (zbarText != null && !zbarText.equals(zxingText)) {
+            resultStr.append("\nZBar内容: ").append(zbarText);
+        }
+        if (wechatText != null && !wechatText.equals(zxingText) && !wechatText.equals(zbarText)) {
+            resultStr.append("\nWeChat内容: ").append(wechatText);
+        }
+
+        return new Object[] {resultStr.toString(), zxingQr, zbarQr, wechatQr};
     }
 
 
