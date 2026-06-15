@@ -1,0 +1,3 @@
+/Users/lzj/code/studytest/app/.cxx/Debug/5hh364s6/arm64-v8a/CMakeFiles/rebuild_cache.dir
+/Users/lzj/code/studytest/app/.cxx/Debug/5hh364s6/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/lzj/code/studytest/app/.cxx/Debug/5hh364s6/arm64-v8a/CMakeFiles/zxingcpp_wrapper.dir

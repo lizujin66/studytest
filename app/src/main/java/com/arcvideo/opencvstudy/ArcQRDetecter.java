@@ -26,6 +26,7 @@ public class ArcQRDetecter {
     public static final int DECODE_ZBAR = 1;
     public static final int DECODE_WECHAT = 2;
     public static final int DECODE_OPENCV_DETECT = 3;
+    public static final int DECODE_ZXINGCPP = 4;
 
     private static ResultPoint[] sortPoints(ResultPoint[] points) {
         ResultPoint[] sorted = new ResultPoint[4];
@@ -383,6 +384,26 @@ public class ArcQRDetecter {
             } catch (Exception e) {
                 Log.e(TAG, "OpenCV Detect error", e);
             }
+        } else if (decodeType == DECODE_ZXINGCPP) {
+            try {
+                Object[] result = ZXingCppDetector.detectAndDecode(bitmap);
+                if (result != null && result.length == 2 && result[0] instanceof String && result[1] instanceof float[]) {
+                    String text = (String) result[0];
+                    float[] pts = (float[]) result[1];
+                    if (pts.length >= 8) {
+                        resPoints = new ResultPoint[] {
+                            new ResultPoint(pts[0], pts[1]), // top-left
+                            new ResultPoint(pts[2], pts[3]), // top-right
+                            new ResultPoint(pts[4], pts[5]), // bottom-right
+                            new ResultPoint(pts[6], pts[7])  // bottom-left
+                        };
+                        find = true;
+                        Log.d(TAG, "parseQRcode out zxingcpp text = " + text);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "zxingcpp error", e);
+            }
         }
 
         if (resPoints != null) {
@@ -400,9 +421,11 @@ public class ArcQRDetecter {
         Bitmap zxingQr = null;
         Bitmap zbarQr = null;
         Bitmap wechatQr = null;
+        Bitmap zxingcppQr = null;
         String zxingText = null;
         String zbarText = null;
         String wechatText = null;
+        String zxingcppText = null;
         int qrSize = 400;
         
         // 1. ZXing
@@ -495,9 +518,34 @@ public class ArcQRDetecter {
                 wechatQr = CodeUtils.createQRCode(wechatText, qrSize, null);
             } catch (Exception e) {}
             wechatGenTime = System.currentTimeMillis() - genStart;
-            resultStr.append("WeChat: 成功 (解码:").append(wechatTime).append("ms, 生成:").append(wechatGenTime).append("ms)");
+            resultStr.append("WeChat: 成功 (解码:").append(wechatTime).append("ms, 生成:").append(wechatGenTime).append("ms)\n");
         } else {
-            resultStr.append("WeChat: 失败 (").append(wechatTime).append("ms)");
+            resultStr.append("WeChat: 失败 (").append(wechatTime).append("ms)\n");
+        }
+
+        // 4. ZXingCpp
+        start = System.currentTimeMillis();
+        boolean zxingcppSuccess = false;
+        long zxingcppGenTime = 0;
+        try {
+            Object[] res = ZXingCppDetector.detectAndDecode(bitmap);
+            if (res != null && res.length == 2 && res[0] instanceof String) {
+                zxingcppSuccess = true;
+                zxingcppText = (String) res[0];
+            }
+        } catch (Exception e) {
+        }
+        long zxingcppTime = System.currentTimeMillis() - start;
+
+        if (zxingcppSuccess) {
+            long genStart = System.currentTimeMillis();
+            try {
+                zxingcppQr = CodeUtils.createQRCode(zxingcppText, qrSize, null);
+            } catch (Exception e) {}
+            zxingcppGenTime = System.currentTimeMillis() - genStart;
+            resultStr.append("ZXingCpp: 成功 (解码:").append(zxingcppTime).append("ms, 生成:").append(zxingcppGenTime).append("ms)");
+        } else {
+            resultStr.append("ZXingCpp: 失败 (").append(zxingcppTime).append("ms)");
         }
 
         if (zxingText != null) {
@@ -509,8 +557,11 @@ public class ArcQRDetecter {
         if (wechatText != null && !wechatText.equals(zxingText) && !wechatText.equals(zbarText)) {
             resultStr.append("\nWeChat内容: ").append(wechatText);
         }
+        if (zxingcppText != null && !zxingcppText.equals(zxingText) && !zxingcppText.equals(zbarText) && !zxingcppText.equals(wechatText)) {
+            resultStr.append("\nZXingCpp内容: ").append(zxingcppText);
+        }
 
-        return new Object[] {resultStr.toString(), zxingQr, zbarQr, wechatQr};
+        return new Object[] {resultStr.toString(), zxingQr, zbarQr, wechatQr, zxingcppQr};
     }
 
 

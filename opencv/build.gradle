@@ -57,7 +57,8 @@ android {
         main {
             jniLibs.srcDirs = [] // Use Jenly1314's OpenCV .so with WeChatQRCode
             java.srcDirs = ['java/src']
-            // res and manifest will use defaults: src/main/res and src/main/AndroidManifest.xml
+            res.srcDirs = ['java/res']
+            manifest.srcFile 'java/AndroidManifest.xml'
         }
     }
 

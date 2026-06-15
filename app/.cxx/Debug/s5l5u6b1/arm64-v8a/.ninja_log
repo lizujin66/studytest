@@ -1,0 +1,23 @@
+# ninja log v5
+0	511	1781507876	CMakeFiles/zxingcpp_wrapper.dir/zxingcpp_jni.cpp.o	d7c15cb057a1fa88
+512	694	1781507876	/Users/lzj/code/studytest/app/build/intermediates/cxx/Debug/s5l5u6b1/obj/arm64-v8a/libzxingcpp_wrapper.so	e1d880a7d11b22c7
+0	32	0	clean	4bdcd75ea3acfb82
+2	908	1781507993	CMakeFiles/zxingcpp_wrapper.dir/zxingcpp_jni.cpp.o	d7c15cb057a1fa88
+909	1230	1781507993	/Users/lzj/code/studytest/app/build/intermediates/cxx/Debug/s5l5u6b1/obj/arm64-v8a/libzxingcpp_wrapper.so	e1d880a7d11b22c7
+0	34	0	clean	4bdcd75ea3acfb82
+3	821	1781508012	CMakeFiles/zxingcpp_wrapper.dir/zxingcpp_jni.cpp.o	d7c15cb057a1fa88
+821	1154	1781508012	/Users/lzj/code/studytest/app/build/intermediates/cxx/Debug/s5l5u6b1/obj/arm64-v8a/libzxingcpp_wrapper.so	e1d880a7d11b22c7
+0	32	0	clean	4bdcd75ea3acfb82
+3	923	1781508092	CMakeFiles/zxingcpp_wrapper.dir/zxingcpp_jni.cpp.o	d7c15cb057a1fa88
+923	1238	1781508092	/Users/lzj/code/studytest/app/build/intermediates/cxx/Debug/s5l5u6b1/obj/arm64-v8a/libzxingcpp_wrapper.so	e1d880a7d11b22c7
+1	41	0	clean	4bdcd75ea3acfb82
+0	68	0	clean	4bdcd75ea3acfb82
+4	832	1781508115	CMakeFiles/zxingcpp_wrapper.dir/zxingcpp_jni.cpp.o	d7c15cb057a1fa88
+833	1141	1781508116	/Users/lzj/code/studytest/app/build/intermediates/cxx/Debug/s5l5u6b1/obj/arm64-v8a/libzxingcpp_wrapper.so	e1d880a7d11b22c7
+0	42	0	clean	4bdcd75ea3acfb82
+2	771	1781509819	CMakeFiles/zxingcpp_wrapper.dir/zxingcpp_jni.cpp.o	d7c15cb057a1fa88
+772	1093	1781509819	/Users/lzj/code/studytest/app/build/intermediates/cxx/Debug/s5l5u6b1/obj/arm64-v8a/libzxingcpp_wrapper.so	e1d880a7d11b22c7
+0	29	0	clean	4bdcd75ea3acfb82
+2	779	1781510037	CMakeFiles/zxingcpp_wrapper.dir/zxingcpp_jni.cpp.o	d7c15cb057a1fa88
+779	1062	1781510038	/Users/lzj/code/studytest/app/build/intermediates/cxx/Debug/s5l5u6b1/obj/arm64-v8a/libzxingcpp_wrapper.so	e1d880a7d11b22c7
+0	59	0	clean	4bdcd75ea3acfb82
